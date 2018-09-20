@@ -58,12 +58,12 @@ field = [[0, 0, 0, 0],
 [0, 0, 0, 0]]
 
 def printField():
-    print('-' * 21)
+    print('-' * 18)
     for i in range(4):
         print('|', end='')
         for j in range(4):
             if field[i][j] == 0:
-                print(bcolors.I_BLACK, end='')
+                print(bcolors.BLACK, end='')
             elif field[i][j] == 2:
                 print(bcolors.DI_WHITE, end='')
                 print(bcolors.D_BLACK, end='')
@@ -97,11 +97,13 @@ def printField():
             elif field[i][j] == 2048:
                 print(bcolors.I_PURPLE, end='')
                 print(bcolors.WHITE, end='')
-            print(str(field[i][j]).rjust(4, ' '), end='')
+            if field[i][j] != 0:
+                print(str(field[i][j]).rjust(4, ' '), end='')
+            else:
+                print('    ', end='')
             print(bcolors.ENDC, end='')
-            print('|', end='')
-        print()
-        print('-' * 21)
+        print('|')
+    print('-' * 18)
 
 def genNewNumber():
     placed = False
