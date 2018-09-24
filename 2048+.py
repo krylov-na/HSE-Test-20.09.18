@@ -58,52 +58,48 @@ field = [[0, 0, 0, 0],
 [0, 0, 0, 0]]
 
 def printField():
-    print('-' * 18)
+    print(bcolors.I_WHITE, end='')
+    print(' ' * 18, end='')
+    print(bcolors.ENDC)
     for i in range(4):
-        print('|', end='')
+        print(bcolors.I_WHITE, end='')
+        print(' ', end='')
+        print(bcolors.ENDC, end='')
         for j in range(4):
-            if field[i][j] == 0:
-                print(bcolors.BLACK, end='')
-            elif field[i][j] == 2:
-                print(bcolors.DI_WHITE, end='')
-                print(bcolors.D_BLACK, end='')
+            print(bcolors.WHITE, end='')
+            if field[i][j] == 2:
+                print(bcolors.I_BLACK, end='')
             elif field[i][j] == 4:
                 print(bcolors.DI_YELLOW, end='')
-                print(bcolors.D_BLACK, end='')
             elif field[i][j] == 8:
                 print(bcolors.DI_RED, end='')
-                print(bcolors.WHITE, end='')
             elif field[i][j] == 16:
                 print(bcolors.DI_PURPLE, end='')
-                print(bcolors.WHITE, end='')
             elif field[i][j] == 32:
                 print(bcolors.DI_BLUE, end='')
-                print(bcolors.WHITE, end='')
             elif field[i][j] == 64:
                 print(bcolors.DI_CYAN, end='')
-                print(bcolors.WHITE, end='')
             elif field[i][j] == 128:
                 print(bcolors.DI_GREEN, end='')
-                print(bcolors.WHITE, end='')
             elif field[i][j] == 256:
-                print(bcolors.I_WHITE, end='')
-                print(bcolors.D_BLACK, end='')
+                print(bcolors.BLACK, end='')
             elif field[i][j] == 512:
                 print(bcolors.I_YELLOW, end='')
-                print(bcolors.D_BLACK, end='')
             elif field[i][j] == 1024:
                 print(bcolors.I_RED, end='')
-                print(bcolors.WHITE, end='')
             elif field[i][j] == 2048:
                 print(bcolors.I_PURPLE, end='')
-                print(bcolors.WHITE, end='')
             if field[i][j] != 0:
                 print(str(field[i][j]).rjust(4, ' '), end='')
             else:
                 print('    ', end='')
             print(bcolors.ENDC, end='')
-        print('|')
-    print('-' * 18)
+        print(bcolors.I_WHITE, end='')
+        print(' ', end='')
+        print(bcolors.ENDC)
+    print(bcolors.I_WHITE, end='')
+    print(' ' * 18, end='')
+    print(bcolors.ENDC)
 
 def genNewNumber():
     placed = False
@@ -145,26 +141,38 @@ def setField(row, cell, direction, value):
     elif direction == 'k':
         field[3 - cell][row] = value
 
+def combine(row, cell, _dir):
+    if getField(row, cell, _dir) == getField(row, cell + 1, _dir):
+        if getField(row, cell, _dir) != 0:
+            newValue = int(getField(row, cell + 1, _dir) * 2)
+            setField(row, cell, _dir, newValue)
+            for nextCell in range(cell + 1, 3):
+                value = getField(row, nextCell + 1, _dir)
+                setField(row, nextCell, _dir, value)
+            setField(row, 3, _dir, 0)
+
 def move(_dir):
+    anyMoves = False
     for row in range(4):
         for cell in range(3):
             steps = 0
+            moved = False
             while getField(row, cell, _dir) == 0:
                 for nextCell in range(cell, 3):
                     value = getField(row, nextCell + 1, _dir)
                     setField(row, nextCell, _dir, value)
                 setField(row, 3, _dir, 0)
                 if steps == 4:
+                    moved = False
                     break
                 steps += 1
-            if getField(row, cell, _dir) == getField(row, cell + 1, _dir):
-                if getField(row, cell, _dir) != 0:
-                    newValue = int(getField(row, cell + 1, _dir) * 2)
-                    setField(row, cell, _dir, newValue)
-                    for nextCell in range(cell + 1, 3):
-                        value = getField(row, nextCell + 1, _dir)
-                        setField(row, nextCell, _dir, value)
-                    setField(row, 3, _dir, 0)
+                moved = True
+            if moved:
+                anyMoves = True
+            if cell > 0 and moved:
+                combine(row, cell - 1, _dir)
+            combine(row, cell, _dir)
+    return anyMoves
 
 def validateInput(_dir):
     if _dir == 'j' or _dir == 'k' or _dir == 'i' or _dir == 'l':
@@ -174,12 +182,14 @@ def validateInput(_dir):
 firstMove = True
 
 while not checkIfLost():
+    anyMoves = True
     if not firstMove:
         _dir = input()
         while not validateInput(_dir):
             _dir = input()
-        move(_dir)
+        anyMoves = move(_dir)
     else:
         firstMove = False
-    genNewNumber()
+    if anyMoves:
+        genNewNumber()
     printField()
